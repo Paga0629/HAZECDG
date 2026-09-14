@@ -1,0 +1,68 @@
+project_layout:
+  third_party_root: ./third_party
+  checkpoint_root: ./checkpoints
+  dataset_root: ./dataset
+environment:
+  conda_env: LHD_xformers_blackwell
+  note: Use the project's environment.yml; do not install each third-party requirements
+    file on top of it.
+LHD:
+  paper: 'Learning Hazing to Dehazing: Towards Realistic Haze Generation for Real-World
+    Image Dehazing (CVPR 2025)'
+  repo:
+    url: https://github.com/ruiyi-w/Learning-Hazing-to-Dehazing.git
+    destination: ./third_party/Learning-Hazing-to-Dehazing
+  checkpoints:
+    sd21_ckpt:
+      filename: v2-1_512-ema-pruned.ckpt
+      destination: ./checkpoints/Learning-Hazing-to-Dehazing/v2-1_512-ema-pruned.ckpt
+      preferred_source: stabilityai/stable-diffusion-2-1-base
+      public_mirror: sd-research/stable-diffusion-2-1-base
+    haze_generator:
+      filename: stage1.pt
+      destination: ./checkpoints/Learning-Hazing-to-Dehazing/stage1.pt
+      official_url: https://pan.baidu.com/s/1vbxEwftJC9nUaMXJ-t9sww?pwd=8egg
+      password: 8egg
+    diffdehaze:
+      filename: stage2.pt
+      destination: ./checkpoints/Learning-Hazing-to-Dehazing/stage2.pt
+      official_url: https://pan.baidu.com/s/1vbxEwftJC9nUaMXJ-t9sww?pwd=8egg
+      password: 8egg
+DOD:
+  paper: 'Diffusion Once and Done: Degradation-Aware LoRA for All-in-One Image Restoration
+    (AAAI 2026)'
+  repo:
+    url: https://github.com/tonia86/DOD.git
+    destination: ./third_party/DOD
+  prompt_embeds:
+    source: ./third_party/DOD/prompt_embeds.pt
+    note: Included in the official repository.
+  checkpoints:
+    sd21_diffusers:
+      destination: ./checkpoints/DOD/sd21
+      preferred_source: sd-research/stable-diffusion-2-1-base
+      required_subdirs:
+      - tokenizer
+      - text_encoder
+      - scheduler
+      - vae
+      - unet
+    stage1:
+      official_google_drive_folder: https://drive.google.com/drive/folders/1O0BKy9qfWKwJrLwkIl3mG9xx_Z7NLkm-?usp=sharing
+      released_filename: model_1.pkl
+      destination: ./checkpoints/DOD/stage1.pkl
+    stage2:
+      official_google_drive_folder: https://drive.google.com/drive/folders/1O0BKy9qfWKwJrLwkIl3mG9xx_Z7NLkm-?usp=sharing
+      released_filename: model_NAFNet_1.pkl
+      destination: ./checkpoints/DOD/stage2.pkl
+    mfm_ddpm:
+      filename: 256x256_diffusion_uncond.pt
+      official_url: https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt
+      destination: ./checkpoints/DOD/mfm/256x256_diffusion_uncond.pt
+datasets:
+  RTTS: ./dataset/RTTS
+  URHI: ./dataset/URHI
+  Fattal: ./dataset/Fattal
+verification:
+  lhd: python scripts/eval_LHD_HazeCDG.py --config configs/eval_LHD_HazeCDG.yaml --check-only
+  dod: python scripts/eval_DOD_HazeCDG.py --config configs/eval_DOD_HazeCDG.yaml --check-only

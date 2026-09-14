@@ -1,0 +1,145 @@
+# =============================================================================
+# Diffusion Once and Done (DOD, AAAI 2026)
+# + Haze Counter-Degradation Guidance (HazeCDG)
+# =============================================================================
+#
+# One-step HazeCDG formulation
+# ----------------------------
+# DOD is an independently trained one-step diffusion restorer. In hazecdg mode,
+# the frozen LHD Stage1 HazeGen is reused only to sense the local haze
+# differential at DOD's native latent state and timestep t=999:
+#
+#   g = eps_D - eps_base
+#
+# Reversing the degradation reference from eps_base + g to eps_base - g gives
+# the HazeCDG counter-degradation transport 2g. Because DOD performs restoration
+# in a single reverse transition, the paper matches the cumulative correction
+# energy of the 50-step reference sampler using a coefficient determined only
+# from the known diffusion schedules:
+#
+#   eta_DOD = H_50 / H_DOD = 0.44341345
+#   eps_R^HazeCDG = eps_R - 2 eta_DOD g
+#
+# eta_DOD is not tuned on validation data and is not a manually selected
+# guidance-strength hyperparameter. The corrected epsilon prediction is passed
+# to DOD's original scheduler step and Stage2 HDE decoder. All model parameters
+# remain frozen.
+#
+# Controlled modes
+# ----------------
+# baseline:
+#   Official DOD one-step inference. LHD HazeGen is not loaded.
+#
+# hazecdg:
+#   The same DOD inference with one schedule-normalized HazeCDG correction
+#   inserted immediately before scheduler.step. DOD has one reverse step, so
+#   sparse anchor scheduling / causal reuse is not applicable (K=1).
+#
+# Public dataset layout
+# ---------------------
+# Only the three real-world benchmarks evaluated in the paper are supported:
+#
+#   dataset/RTTS/
+#   dataset/URHI/
+#   dataset/Fattal/
+#
+# The selected folder is evaluated recursively. To reproduce the paper, place
+# the 4,322 RTTS images, the paper's 150-image URHI subset, and the 31 Fattal
+# images in the corresponding folders.
+#
+# Automatic outputs
+# -----------------
+# baseline -> outputs/DOD/baseline/<DATASET>/
+# hazecdg  -> outputs/DOD/hazecdg/<DATASET>/
+# =============================================================================
+
+experiment:
+  # baseline | hazecdg
+  mode: hazecdg
+
+paths:
+  # ---------------------------------------------------------------------------
+  # Official DOD
+  # ---------------------------------------------------------------------------
+  dod_repo_root: ./third_party/DOD
+  dod_sd21_root: ./checkpoints/DOD/sd21
+  dod_stage1_checkpoint: ./checkpoints/DOD/stage1.pkl
+  dod_stage2_checkpoint: ./checkpoints/DOD/stage2.pkl
+  dod_mfm_checkpoint: ./checkpoints/DOD/mfm/256x256_diffusion_uncond.pt
+  dod_prompt_embeds: ./third_party/DOD/prompt_embeds.pt
+
+  # ---------------------------------------------------------------------------
+  # LHD Stage1 HazeGen -- loaded only when experiment.mode=hazecdg
+  # ---------------------------------------------------------------------------
+  lhd_repo_root: ./third_party/Learning-Hazing-to-Dehazing
+  lhd_stage1_config: ./third_party/Learning-Hazing-to-Dehazing/configs/inference/stage1.yaml
+  lhd_sd_checkpoint: ./checkpoints/Learning-Hazing-to-Dehazing/v2-1_512-ema-pruned.ckpt
+  lhd_stage1_checkpoint: ./checkpoints/Learning-Hazing-to-Dehazing/stage1.pt
+
+data:
+  # RTTS | URHI | Fattal
+  dataset: RTTS
+
+  # Automatic input path:
+  #   RTTS   -> ./dataset/RTTS/
+  #   URHI   -> ./dataset/URHI/
+  #   Fattal -> ./dataset/Fattal/
+  dataset_root: ./dataset
+
+  # Optional explicit override. Leave empty for the automatic paths above.
+  input_root: ""
+
+  # Empty -> automatic:
+  # baseline -> outputs/DOD/baseline/<DATASET>/
+  # hazecdg  -> outputs/DOD/hazecdg/<DATASET>/
+  output_root: ""
+
+  # 0 = evaluate every image in the selected dataset folder.
+  # 1 = smoke test; larger positive values evaluate the first N sorted images.
+  max_images: 0
+
+  # Resume already-completed outputs.
+  skip_existing: true
+
+inference:
+  # CRITICAL: the released DOD model performs one-step restoration.
+  steps: 1
+
+  # Official test.py preprocessing defaults.
+  process_size: 256
+  upscale: 1
+
+  # Official inference default.
+  mixed_precision: fp16
+  lora_rank: 8
+
+  # Official DOD latent tiling defaults.
+  latent_tiled_size: 96
+  latent_tiled_overlap: 32
+  vae_decoder_tiled_size: 224
+  vae_encoder_tiled_size: 1024
+
+hazecdg:
+  # Haze text condition used by the frozen LHD Stage1 degradation model G_D.
+  degradation_prompt: "hazy, foggy, misty, obscure, smoggy."
+
+  # Diagnostic printing only; does not change the algorithm.
+  log_diagnostics: true
+
+runtime:
+  expected_conda_env: LHD_xformers_blackwell
+
+  # Upstream DOD uses explicit .cuda() calls. Keep cuda:0; use
+  # CUDA_VISIBLE_DEVICES below if a different physical GPU is desired.
+  device: cuda:0
+  cuda_visible_devices: ""
+
+  # Applies only to the LHD Stage1 sensing branch in hazecdg mode.
+  lhd_attention_mode: xformers
+
+  # A constant per-image seed controls DOD's latent_dist.sample(). Using the
+  # same seed in baseline and hazecdg keeps the DOD latent identical.
+  seed: 231
+
+  # Restore outputs to original HxW for dataset metric compatibility.
+  save_original_size: true
