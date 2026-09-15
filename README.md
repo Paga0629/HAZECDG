@@ -144,7 +144,8 @@ python scripts/eval_LHD_HazeCDG.py \
     --dataset "dataset name (RTTS/URHI/Fattal)"
 
 python scripts/eval_metrics.py \
-    --config configs/eval_LHD_HazeCDG.yaml
+    --config configs/eval_LHD_HazeCDG.yaml \
+    --dataset "dataset name (RTTS/URHI/Fattal)"
 ```
 
 ### DOD
