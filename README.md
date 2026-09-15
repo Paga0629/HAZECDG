@@ -141,12 +141,18 @@ configs/eval_DOD_HazeCDG.yaml
 ```bash
 python scripts/eval_LHD_HazeCDG.py \
     --config configs/eval_LHD_HazeCDG.yaml
+
+python scripts/eval_metrics.py \
+    --config configs/eval_LHD_HazeCDG.yaml
 ```
 
 ### DOD
 
 ```bash
 python scripts/eval_DOD_HazeCDG.py \
+    --config configs/eval_DOD_HazeCDG.yaml
+
+python scripts/eval_metrics.py \
     --config configs/eval_DOD_HazeCDG.yaml
 ```
 
