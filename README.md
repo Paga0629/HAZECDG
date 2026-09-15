@@ -152,10 +152,12 @@ python scripts/eval_metrics.py \
 
 ```bash
 python scripts/eval_DOD_HazeCDG.py \
-    --config configs/eval_DOD_HazeCDG.yaml
+    --config configs/eval_DOD_HazeCDG.yaml \
+    --dataset "dataset name (RTTS/URHI/Fattal)"
 
 python scripts/eval_metrics.py \
-    --config configs/eval_DOD_HazeCDG.yaml
+    --config configs/eval_DOD_HazeCDG.yaml \
+    --dataset "dataset name (RTTS/URHI/Fattal)"
 ```
 
 ---
