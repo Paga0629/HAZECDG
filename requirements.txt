@@ -67,9 +67,7 @@ python-dateutil==2.9.0.post0
 gdown==6.1.0
 future==1.0.0
 yapf==0.43.0
-fade-python==1.0.0
 
 # LHD
 gradio==4.43.0
-
 typeguard==4.4.4
