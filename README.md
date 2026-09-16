@@ -24,42 +24,6 @@ pip install -r requirements.txt
 
 > `xformers` is intentionally excluded from `requirements.txt` because the standard CUDA 12.8 wheel may not include kernels compiled for Blackwell `SM120`.
 
-### 1.3 Build xFormers for Blackwell
-
-```bash
-export CUDA_HOME="${CONDA_PREFIX}"
-export TORCH_CUDA_ARCH_LIST="12.0"
-export FORCE_CUDA=1
-export MAX_JOBS=4
-
-git clone --recursive \
-    --branch v0.0.33.post2 \
-    --depth 1 \
-    https://github.com/facebookresearch/xformers.git \
-    /tmp/xformers-v0.0.33.post2
-
-cd /tmp/xformers-v0.0.33.post2
-
-pip install \
-    --no-build-isolation \
-    --no-deps \
-    .
-```
-
-Return to the HAZECDG project root after installation.
-
-```bash
-cd /path/to/HAZECDG
-```
-
-> If xFormers compilation uses too much system memory, reduce `MAX_JOBS`, for example:
->
-> ```bash
-> export MAX_JOBS=2
-> ```
-
----
-
 ## 📦 2. Third-Party Baselines
 
 Run the following commands from the HAZECDG project root:
