@@ -8,6 +8,7 @@ This repository provides the HAZECDG evaluation pipeline with wrappers for **Lea
 
 > This environment is prepared for NVIDIA Blackwell GPUs such as the **NVIDIA RTX PRO 6000 Blackwell Workstation Edition**.  
 > PyTorch uses CUDA 12.8, and xFormers is built from source for Blackwell `SM120`.
+> Nvidia Driver Version: 580.173.02
 
 ### 1.1 Create the Conda environment
 
