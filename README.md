@@ -13,7 +13,7 @@ This repository provides the HAZECDG evaluation pipeline with wrappers for **Lea
 
 ```bash
 conda env create -f environment.yml
-conda activate LHD_xformers_blackwell
+conda activate hazecdg
 ```
 
 ### 1.2 Install Python dependencies
