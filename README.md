@@ -13,17 +13,16 @@ This repository provides the HAZECDG evaluation pipeline with wrappers for **Lea
 ### 1.1 Create the Conda environment
 
 ```bash
-conda env create -f environment.yml
+conda create -n hazecdg --file explicit.txt
 conda activate hazecdg
 ```
 
 ### 1.2 Install Python dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-pip.txt \
+  --extra-index-url https://download.pytorch.org/whl/cu128
 ```
-
-> `xformers` is intentionally excluded from `requirements.txt` because the standard CUDA 12.8 wheel may not include kernels compiled for Blackwell `SM120`.
 
 ## 📦 2. Third-Party Baselines
 
