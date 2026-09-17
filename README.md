@@ -82,10 +82,6 @@ git clone https://github.com/tonia86/DOD.git \
     third_party/DOD
 ```
 
-> **Do not install the original dependencies from the third-party repositories.**
->
-> The provided HAZECDG environment contains the unified dependency stack for both LHD and DOD. Installing their original requirements may overwrite the PyTorch, CUDA, or other package versions used by HAZECDG.
-
 ---
 
 ## 📥 3. Pretrained Checkpoints
