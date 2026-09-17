@@ -1,0 +1,118 @@
+# =============================================================================
+# Learning Hazing to Dehazing (CVPR 2025)
+# + Haze Counter-Degradation Guidance (HazeCDG)
+# =============================================================================
+#
+# HazeCDG at each sensing anchor a
+# ---------------------------------
+# The frozen haze-generation branch defines a local degradation direction:
+#
+#   g_a      = eps_D,a - eps_base,a
+#   lambda_a = <eps_R,a - eps_base,a, g_a> / ||g_a||^2
+#
+# The coefficient lambda_a measures how much of the current restoration
+# prediction remains aligned with the learned haze direction.  HazeCDG reflects
+# only the positive degradation-aligned component:
+#
+#   q_a      = 2 ReLU(lambda_a) g_a
+#   eps'_a   = eps_R,a - q_a
+#
+# Therefore, when lambda_a > 0, the degradation-axis coordinate changes from
+# +lambda_a to -lambda_a.  When lambda_a <= 0, no correction is applied.
+# The factor 2 comes from this reflection and is not a tuned guidance strength.
+#
+# Sparse sensing
+# --------------
+# Expensive eps_D / eps_base sensing is performed only at K causal anchors.
+# Between two anchors, the most recent epsilon correction is reused directly:
+#
+#   q_k = q_a
+#
+# so non-anchor steps require no extra G_D forward, no eps_base forward, and no
+# lambda recomputation.  For the standard 50-step evaluation, the fixed anchor
+# schedules are uniform and nested: A5 subset A10 subset A25 subset A50.
+#
+# K control
+# ---------
+#   anchor_counts: [5]              -> main sparse HazeCDG setting
+#   anchor_counts: [5, 10, 25, 50] -> controlled K sweep
+#   K=50 with 50 reverse steps      -> dense per-step HazeCDG reflection
+#
+# Output
+# ------
+# baseline:
+#   outputs/LHD/baseline/<DATASET>/
+# hazecdg:
+#   outputs/LHD/hazecdg/<DATASET>/K005/
+#   outputs/LHD/hazecdg/<DATASET>/K010/
+#   outputs/LHD/hazecdg/<DATASET>/K025/
+#   outputs/LHD/hazecdg/<DATASET>/K050/
+#
+# Controlled preprocessing
+# ------------------------
+# If either input dimension is below 512, Resize(512) is applied first.  H and
+# W are then resized independently to the nearest multiple of 64 with no zero
+# padding.  Saved outputs are restored to the original image size.
+# =============================================================================
+
+experiment:
+  # baseline | hazecdg
+  mode: hazecdg
+
+paths:
+  repo_root: ./third_party/Learning-Hazing-to-Dehazing
+  stage1_config: ./third_party/Learning-Hazing-to-Dehazing/configs/inference/stage1.yaml
+  stage2_config: ./third_party/Learning-Hazing-to-Dehazing/configs/inference/stage2.yaml
+  sd_checkpoint: ./checkpoints/Learning-Hazing-to-Dehazing/v2-1_512-ema-pruned.ckpt
+  stage1_checkpoint: ./checkpoints/Learning-Hazing-to-Dehazing/stage1.pt
+  stage2_checkpoint: ./checkpoints/Learning-Hazing-to-Dehazing/stage2.pt
+
+data:
+  # RTTS | URHI | Fattal
+  dataset: Fattal
+  dataset_root: ./datasets
+  # RTTS         : datasets/RTTS
+  # URHI         : datasets/URHI
+  # Fattal       : datasets/Fattal
+  input_root: "datasets/Fattal"
+
+  # Empty -> automatic:
+  # baseline -> outputs/LHD/baseline/<DATASET>/
+  # hazecdg  -> outputs/LHD/hazecdg/<DATASET>/Kxxx/
+  output_root: "test_result/"
+
+  # 0 = full dataset; 1 = smoke test; 25/50 = quick diagnostic.
+  max_images: 0
+
+  # Resume already-completed outputs.
+  skip_existing: true
+
+inference:
+  # Standard LHD SpacedSampler. AccSamp / RGB fidelity guidance are OFF.
+  steps: 50
+  dehaze_prompt: "remove dense fog"
+  progress: true
+
+hazecdg:
+  # Text condition used by the frozen degradation branch G_D.
+  degradation_prompt: "hazy, foggy, misty, obscure, smoggy."
+
+  # Number of causal sensing anchors.  The 50-step schedules are fixed,
+  # uniform, nested, and dataset-independent.
+  #anchor_counts: [10, 25, 50] # [5, 10, 25, 50]
+  anchor_counts: [5]
+
+  # Step logging only; does not affect the algorithm.
+  log_every: 100
+
+runtime:
+  expected_conda_env: hazecdg
+  device: cuda:0
+  attention_mode: xformers
+  seed: 231
+  cuda_visible_devices: ""
+  save_original_size: true
+
+  # Keep false for controlled final-paper runs.
+  oom_retry_enabled: false
+  oom_retry_scales: [0.75, 0.50, 0.375, 0.25]
