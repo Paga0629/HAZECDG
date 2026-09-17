@@ -102,7 +102,6 @@ checkpoints/
 │   ├── stage1.pt
 │   └── stage2.pt
 └── DOD/
-    ├── sd21/
     ├── stage1.pkl
     ├── stage2.pkl
     └── mfm/
