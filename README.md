@@ -10,18 +10,59 @@ This repository provides the HAZECDG evaluation pipeline with wrappers for **Lea
 > PyTorch uses CUDA 12.8, and xFormers is built from source for Blackwell `SM120`.
 > Nvidia Driver Version: 580.173.02.
 
-### 1.1 Create the Conda environment
+### 1.1 Conda environment
 
 ```bash
-conda create -n hazecdg --file explicit.txt
+conda create -n hazecdg --file explicit.txt -y
 conda activate hazecdg
 ```
 
-### 1.2 Install Python dependencies
+### 1.2 Pip Packages
 
 ```bash
-pip install -r requirements-pip.txt \
-  --extra-index-url https://download.pytorch.org/whl/cu128
+python -m pip install \
+  --no-deps \
+  --extra-index-url https://download.pytorch.org/whl/cu128 \
+  -r requirements-pip.txt
+```
+
+### 1.3 Setuptools / Wheel
+
+```bash
+python -m pip install --no-deps --force-reinstall \
+  setuptools==80.9.0 \
+  wheel==0.48.0
+```
+
+### 1.4 OpenCV
+
+```bash
+python -m pip install --no-deps --force-reinstall \
+  opencv-python-headless==5.0.0.93
+```
+
+### 1.5 Xformer Capability
+
+```bash
+python - <<'PY'
+from pathlib import Path
+import xformers
+
+p = Path(xformers.__file__).parent / "ops" / "fmha" / "cutlass.py"
+
+old = "CUDA_MAXIMUM_COMPUTE_CAPABILITY = (9, 0)"
+new = "CUDA_MAXIMUM_COMPUTE_CAPABILITY = (12, 0)"
+
+s = p.read_text()
+
+if new in s:
+    print("[OK] xformers already patched")
+elif old in s:
+    p.write_text(s.replace(old, new, 1))
+    print("[OK] xformers Blackwell patch applied")
+else:
+    raise RuntimeError(f"Unexpected xformers file: {p}")
+PY
 ```
 
 ## 📦 2. Third-Party Baselines
@@ -29,7 +70,7 @@ pip install -r requirements-pip.txt \
 Run the following commands from the HAZECDG project root:
 
 ```bash
-mkdir -p dataset
+mkdir -p datasets
 mkdir -p third_party
 mkdir -p checkpoints/Learning-Hazing-to-Dehazing
 mkdir -p checkpoints/DOD
@@ -78,22 +119,13 @@ checkpoints/
 
 ## 🗂️ 4. Dataset Preparation
 
-Place the evaluation datasets under `./dataset/`:
+Place the evaluation datasets under `./datasets/`:
 
 ```text
-dataset/
+datasets/
 ├── RTTS/
 ├── URHI/
 └── Fattal/
-```
-
-Only the datasets required for your experiment need to be prepared.
-
-Dataset and output paths can be configured in:
-
-```text
-configs/eval_LHD_HazeCDG.yaml
-configs/eval_DOD_HazeCDG.yaml
 ```
 
 ---
@@ -105,11 +137,9 @@ configs/eval_DOD_HazeCDG.yaml
 ```bash
 python scripts/eval_LHD_HazeCDG.py \
     --config configs/eval_LHD_HazeCDG.yaml \
-    --dataset "dataset name (RTTS/URHI/Fattal)"
 
 python scripts/eval_metrics.py \
     --config configs/eval_LHD_HazeCDG.yaml \
-    --dataset "dataset name (RTTS/URHI/Fattal)"
 ```
 
 ### DOD
@@ -117,13 +147,17 @@ python scripts/eval_metrics.py \
 ```bash
 python scripts/eval_DOD_HazeCDG.py \
     --config configs/eval_DOD_HazeCDG.yaml \
-    --dataset "dataset name (RTTS/URHI/Fattal)"
 
 python scripts/eval_metrics.py \
     --config configs/eval_DOD_HazeCDG.yaml \
-    --dataset "dataset name (RTTS/URHI/Fattal)"
 ```
 
+Dataset and output paths can be configured in:
+
+```text
+configs/eval_LHD_HazeCDG.yaml
+configs/eval_DOD_HazeCDG.yaml
+```
 ---
 
 ## Notes
