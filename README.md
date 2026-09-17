@@ -91,7 +91,7 @@ Pretrained weights will be provided separately.
 | Checkpoint package | Download |
 |---|---|
 | LHD / DiffDehaze | [Download](https://github.com/ruiyi-w/Learning-Hazing-to-Dehazing) |
-| DOD | [Download](CHECKPOINT_LINK_DOD) |
+| DOD | [Download](https://github.com/tonia86/DOD?utm_source=chatgpt.com) |
 
 Place the downloaded files under `./checkpoints/`:
 
