@@ -109,8 +109,6 @@ checkpoints/
         └── 256x256_diffusion_uncond.pt
 ```
 
-> Replace the placeholder links above with the final checkpoint URLs before release.
-
 ---
 
 ## 🗂️ 4. Dataset Preparation
