@@ -91,7 +91,7 @@ We also provide two GitHub links for downloading the corresponding weights indiv
 
 | Checkpoint package | Download |
 |---|---|
-| Google Drive | [Download]([https://github.com/ruiyi-w/Learning-Hazing-to-Dehazing](https://drive.google.com/file/d/1rYIQGlRfVBbdCsEfny1Jg3RmhXhQTFMU/view)) |
+| Google Drive | [Download](https://drive.google.com/file/d/1rYIQGlRfVBbdCsEfny1Jg3RmhXhQTFMU/view) |
 | LHD / DiffDehaze | [Download](https://github.com/ruiyi-w/Learning-Hazing-to-Dehazing) |
 | DOD | [Download](https://github.com/tonia86/DOD?utm_source=chatgpt.com) |
 
