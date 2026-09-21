@@ -86,10 +86,12 @@ git clone https://github.com/tonia86/DOD.git \
 
 ## 📥 3. Pretrained Checkpoints
 
-Pretrained weights will be provided separately.
+Pretrained weights are available via the Google Drive link below. 
+We also provide two GitHub links for downloading the corresponding weights individually.
 
 | Checkpoint package | Download |
 |---|---|
+| Google Drive | [Download]([https://github.com/ruiyi-w/Learning-Hazing-to-Dehazing](https://drive.google.com/file/d/1rYIQGlRfVBbdCsEfny1Jg3RmhXhQTFMU/view)) |
 | LHD / DiffDehaze | [Download](https://github.com/ruiyi-w/Learning-Hazing-to-Dehazing) |
 | DOD | [Download](https://github.com/tonia86/DOD?utm_source=chatgpt.com) |
 
